@@ -4,9 +4,10 @@ package edu.course.lab04;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-class IssueRegistryTest {
+import java.util.HashMap;
+import java.util.Map;
 
-    // --- ВСПОМОГАТЕЛЬНЫЕ КЛАССЫ ДЛЯ ТЕСТОВЫХ ЭКСПЕРИМЕНТОВ ---
+class IssueRegistryTest {
 
     // Ключ с намеренной коллизией: equals работает честно, но hashCode всегда одинаковый
     static final class CollisionIssueId {
@@ -18,7 +19,6 @@ class IssueRegistryTest {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             CollisionIssueId that = (CollisionIssueId) o;
             return code.equals(that.code);
@@ -32,8 +32,7 @@ class IssueRegistryTest {
 
     // Специальный учебный изменяемый ключ (только для тестов)
     static final class MutableIssueId {
-        private String projectCode; // Внимание: поле не final и есть сеттер
-
+        private String projectCode; 
         MutableIssueId(String projectCode) {
             this.projectCode = projectCode;
         }
@@ -56,7 +55,7 @@ class IssueRegistryTest {
         }
     }
 
-    // --- ОБЯЗАТЕЛЬНЫЕ ЭКСПЕРИМЕНТЫ И ТЕСТЫ ---
+    
 
     @Test
     void testBasicOperationsAndLogicalEquality() {
@@ -82,7 +81,7 @@ class IssueRegistryTest {
     @Test
     void testCollisionHandling() {
         // 3. Два неравных ключа с намеренно одинаковым hashCode сохраняют разные значения
-        java.util.Map<CollisionIssueId, String> map = new java.util.HashMap<>();
+        Map<CollisionIssueId, String> map = new HashMap<>();
 
         CollisionIssueId keyA = new CollisionIssueId("PROJ-A");
         CollisionIssueId keyB = new CollisionIssueId("PROJ-B");
@@ -109,7 +108,7 @@ class IssueRegistryTest {
     @Test
     void testMutableKeyProblem() {
         // 5. Проблема изменяемого учебного ключа
-        java.util.Map<MutableIssueId, String> map = new java.util.HashMap<>();
+        Map<MutableIssueId, String> map = new HashMap<>();
 
         MutableIssueId mutableKey = new MutableIssueId("DEV");
         map.put(mutableKey, "Критический баг");
@@ -120,12 +119,13 @@ class IssueRegistryTest {
         // Ломаем состояние ключа, пока он лежит в HashMap
         mutableKey.setProjectCode("QA");
 
-        // ПОСЛЕДСТВИЯ:
         // Хэш-код изменился, HashMap ищет объект в другом баке и возвращает null
         assertNull(map.get(mutableKey));
 
-        // Объект физически остался внутри структуры, но стал недоступен по сломанному ключу
+        // Объект остался внутри структуры, но стал недоступен по сломанному ключу
         assertFalse(map.containsKey(mutableKey));
         assertEquals(1, map.size());
+
+        ChainedHashTable<Integer, String> simple_hasht = new ChainedHashTable<>();
     }
 }
